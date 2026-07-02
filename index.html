@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Errores diagnósticos que simulan resistencia al tratamiento — YACHAY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yachay-bg:#FDEBD0; --yachay-white:#F9F9F9; --yachay-blue:#2B5282;
+  --yachay-blue-dark:#1A3A5C; --yachay-blue-light:#4A72A2; --yachay-salmon:#C28B77;
+  --yachay-gold:#D4AF37; --yachay-text:#4A4A4A; --yachay-track:#DDDDDD;
+  --yachay-warning:#FFF3CD; --yachay-info:#EEF4FF;
+  --yachay-font-heading:"Cinzel",Georgia,serif; --yachay-font-body:"Montserrat",Calibri,sans-serif;
+  --yachay-radius:8px; --yachay-shadow:0 10px 30px rgba(43,82,130,0.12);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;}
+body{background:var(--yachay-blue-dark);color:var(--yachay-text);font-family:var(--yachay-font-body);line-height:1.5;}
+h1,h2,h3,h4{color:var(--yachay-blue);font-family:var(--yachay-font-heading);letter-spacing:0.03em;margin:0 0 .4em;}
+.deck{position:relative;width:100vw;height:100vh;overflow:hidden;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:flex-start;
+  background:var(--yachay-bg);padding:2.6vh 4.5vw 6.6vh;overflow:auto;}
+.slide.active{display:flex;animation:fade .3s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.slide.impact{background:var(--yachay-blue);}
+.slide.impact h1,.slide.impact h2,.slide.impact p,.slide.impact li{color:var(--yachay-bg);}
+.section-tag{border-left:6px solid var(--yachay-salmon);color:var(--yachay-salmon);font-size:.76rem;
+  font-weight:700;letter-spacing:.14em;padding-left:.7rem;text-transform:uppercase;margin-bottom:.7rem;}
+h1{font-size:2.3rem;line-height:1.12;} h2{font-size:1.7rem;} .slide p,.slide li{font-size:1.02rem;}
+.lead{font-size:1.2rem;color:var(--yachay-blue-dark);}
+.card{background:var(--yachay-white);border:1px solid rgba(43,82,130,.16);border-radius:var(--yachay-radius);
+  box-shadow:var(--yachay-shadow);padding:.8rem 1.1rem;margin:.5rem 0;}
+.card.blue-h{border-top:6px solid var(--yachay-blue);}
+.card.salmon-h{border-top:6px solid var(--yachay-salmon);}
+.card h3{font-size:1.05rem;margin-bottom:.3em;}
+ul{margin:.3rem 0 .3rem 1.05rem;} li{margin:.22rem 0;}
+.badge{display:inline-block;background:var(--yachay-salmon);color:var(--yachay-bg);font-size:.66rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:.22rem .65rem;border-radius:20px;margin-bottom:.5rem;}
+.badge.blue{background:var(--yachay-blue);}
+.info-box{background:var(--yachay-info);border:1.5px solid var(--yachay-blue);color:var(--yachay-blue-dark);
+  border-radius:var(--yachay-radius);padding:.7rem 1rem;margin:.5rem 0;font-size:.98rem;}
+.warning-box{background:var(--yachay-warning);border:1.5px solid var(--yachay-salmon);color:var(--yachay-blue-dark);
+  border-radius:var(--yachay-radius);padding:.7rem 1rem;margin:.5rem 0;font-size:.98rem;}
+.cols{display:flex;gap:1rem;flex-wrap:wrap;} .cols>div{flex:1;min-width:230px;}
+.rail{display:flex;gap:.4rem;margin:.1rem 0 .9rem;flex-wrap:wrap;}
+.rail .step{flex:1;min-width:82px;text-align:center;background:var(--yachay-white);border:1px solid rgba(43,82,130,.2);
+  border-radius:20px;padding:.28rem .2rem;font-size:.68rem;font-weight:600;color:var(--yachay-blue-light);}
+.rail .step.on{background:var(--yachay-blue);color:var(--yachay-bg);border-color:var(--yachay-blue);}
+.vemmfal{display:flex;gap:.45rem;margin:.7rem 0;flex-wrap:wrap;}
+.vemmfal .l{width:62px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--yachay-white);border:2px solid var(--yachay-blue);border-radius:var(--yachay-radius);
+  font-family:var(--yachay-font-heading);font-weight:700;color:var(--yachay-blue);font-size:1.2rem;}
+.vemmfal .l small{font-family:var(--yachay-font-body);font-weight:600;font-size:.5rem;color:var(--yachay-text);letter-spacing:0;}
+.vemmfal .l.hot{background:var(--yachay-salmon);border-color:var(--yachay-salmon);color:var(--yachay-bg);}
+.vemmfal .l.hot small{color:var(--yachay-bg);}
+.vtab{width:100%;border-collapse:collapse;font-size:.86rem;margin:.4rem 0;}
+.vtab th{background:var(--yachay-blue);color:var(--yachay-bg);font-family:var(--yachay-font-heading);padding:.35rem .5rem;text-align:left;}
+.vtab td{padding:.32rem .5rem;border-bottom:1px solid rgba(43,82,130,.14);vertical-align:top;}
+.vtab tr:nth-child(even){background:var(--yachay-white);}
+.wordmark{font-family:var(--yachay-font-heading);font-weight:700;letter-spacing:.18em;color:var(--yachay-blue);font-size:1.4rem;}
+.tagline{color:var(--yachay-salmon);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;}
+.refs{position:absolute;left:0;right:0;bottom:2.35rem;padding:.15rem 1.4rem;font-size:.6rem;line-height:1.3;
+  color:var(--yachay-blue-light);font-style:italic;}
+.slide.impact .refs{color:#cdd8e6;}
+.foot{position:absolute;left:0;right:0;bottom:0;background:var(--yachay-blue);color:var(--yachay-bg);
+  padding:.4rem 1.4rem;font-size:.64rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.slide.impact .foot{background:var(--yachay-blue-dark);}
+.foot .brand{font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+.foot .names b{color:var(--yachay-gold);}
+.nav{position:fixed;bottom:.4rem;right:1rem;z-index:20;display:flex;gap:.4rem;}
+.nav button{background:var(--yachay-salmon);color:var(--yachay-bg);border:none;border-radius:6px;width:32px;height:28px;font-size:1rem;cursor:pointer;font-weight:700;}
+.counter{position:fixed;top:.5rem;right:1rem;z-index:20;background:var(--yachay-blue);color:var(--yachay-bg);padding:.18rem .65rem;border-radius:20px;font-size:.72rem;font-weight:600;}
+.cover-sidebar{position:absolute;left:0;top:0;bottom:0;width:14px;background:linear-gradient(var(--yachay-blue),var(--yachay-salmon));}
+.src{font-size:.78rem;color:var(--yachay-blue-light);}
+.mut{color:var(--yachay-blue-light);font-size:.92rem;}
+.reflist{font-size:.78rem;line-height:1.4;column-count:2;column-gap:1.6rem;}
+.reflist li{margin:.18rem 0;break-inside:avoid;}
+/* ---- gráficos HTML/SVG ---- */
+.staircase{display:flex;align-items:flex-end;gap:.4rem;height:210px;margin:.4rem 0 .9rem;}
+.staircase .st{flex:1;background:var(--yachay-white);border:1px solid rgba(43,82,130,.18);border-top:5px solid var(--yachay-blue);
+  border-radius:6px 6px 0 0;display:flex;flex-direction:column;justify-content:flex-start;padding:.4rem .3rem;text-align:center;box-shadow:var(--yachay-shadow);}
+.staircase .st b{color:var(--yachay-blue);font-family:var(--yachay-font-heading);font-size:.92rem;}
+.staircase .st small{color:var(--yachay-text);font-size:.63rem;display:block;margin-top:.12rem;line-height:1.18;}
+.kaxis{display:flex;height:30px;border-radius:6px;overflow:hidden;font-size:.7rem;font-weight:700;color:var(--yachay-bg);}
+.kaxis .z{display:flex;align-items:center;justify-content:center;flex:1;text-align:center;}
+.kaxis .z1{background:#C28B77;} .kaxis .z2{background:#D8B4A5;color:var(--yachay-blue-dark);}
+.kaxis .z3{background:#4A72A2;} .kaxis .z4{background:#2B5282;}
+.kchips{display:flex;margin-top:.35rem;font-size:.72rem;}
+.kchips .c{flex:1;padding:0 .3rem;text-align:center;color:var(--yachay-text);}
+.kchips .c b{color:var(--yachay-blue);display:block;font-size:.66rem;margin-bottom:.15rem;}
+.krange{display:flex;font-size:.6rem;color:var(--yachay-blue-light);margin-top:.15rem;}
+.krange span{flex:1;text-align:center;}
+.tl{position:relative;height:92px;margin:.5rem 0 1rem;border-bottom:2px solid var(--yachay-blue);}
+.tl .bar{position:absolute;height:22px;border-radius:11px;display:flex;align-items:center;padding:0 .5rem;color:var(--yachay-bg);font-size:.7rem;font-weight:700;white-space:nowrap;}
+.tl .b-ae{bottom:50px;left:0;width:4%;background:var(--yachay-salmon);}
+.tl .b-pp{bottom:16px;left:0;width:100%;background:var(--yachay-blue);}
+.tl .lab{position:absolute;font-size:.64rem;color:var(--yachay-blue-light);bottom:1px;}
+.mtx{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.4rem 0;}
+.mtx .cell{padding:.65rem;border-radius:6px;font-size:.86rem;color:var(--yachay-bg);}
+.mtx .ok{background:var(--yachay-blue);} .mtx .err{background:var(--yachay-salmon);color:var(--yachay-blue-dark);}
+.mtx .cell b{display:block;font-family:var(--yachay-font-heading);margin-bottom:.15rem;}
+.mtxhd{font-size:.78rem;color:var(--yachay-blue-light);margin:.2rem 0;}
+.netcap{font-size:.82rem;color:var(--yachay-blue-light);text-align:center;margin-top:.2rem;}
+</style>
+</head>
+<body>
+<div class="counter"><span id="cur">1</span> / 40</div>
+<div class="deck" id="deck">
+
+<!-- 1 COVER -->
+<section class="slide">
+  <div class="cover-sidebar"></div>
+  <div style="margin-left:2rem">
+    <div class="wordmark">YACHAY</div><div class="tagline">Pro · Ciencias & Salud Mental</div>
+    <hr style="border:none;border-top:2px solid var(--yachay-blue);width:120px;margin:1.2rem 0">
+    <h1>Errores diagnósticos que simulan resistencia al tratamiento</h1>
+    <p class="lead">Antes de llamar “resistente”, pregúntate en qué nivel de razonamiento fallaste.</p>
+    <p class="mut">Clase para residentes de psiquiatría y médicos SERUMS · ~50 min</p>
+  </div>
+</section>
+
+<!-- 2 OBJETIVOS -->
+<section class="slide">
+  <div class="section-tag">Qué te llevas</div>
+  <h2>Objetivos de aprendizaje</h2>
+  <p>Al terminar, ante un paciente “resistente” podrás:</p>
+  <div class="cols">
+    <div class="card"><ul>
+      <li><b>Descartar</b> la pseudorresistencia operativa (Nivel 0).</li>
+      <li><b>Distinguir</b> confiabilidad de validez diagnóstica (Nivel 1).</li>
+      <li><b>Aplicar</b> VEMMFAL para descartar causa orgánica/secundaria (Nivel 2).</li>
+    </ul></div>
+    <div class="card"><ul>
+      <li><b>Identificar</b> la dimensión o biotipo no medido (Nivel 3).</li>
+      <li><b>Construir</b> la red de síntomas y hallar el hub (Nivel 4).</li>
+      <li><b>Atribuir</b> la persistencia al estadio y al contexto (Nivel 5).</li>
+    </ul></div>
+  </div>
+  <div class="info-box"><b>Pre-test (3 min):</b> resuelve la viñeta en frío — la retomamos al final para medir tu avance.</div>
+</section>
+
+<!-- 3 HOOK -->
+<section class="slide">
+  <div class="section-tag">El caso que abre la clase</div>
+  <h2>“Solo quiero dejar de ser una traba”</h2>
+  <div class="card blue-h">
+    <p>Mujer de 28 años. <b>Cinco diagnósticos acumulados en diez años</b>. Una bolsa de medicamentos.</p>
+    <p>Cada nuevo médico añadió un fármaco al anterior. Ninguno reabrió el diagnóstico. Hoy figura como <b>“resistente al tratamiento”</b>.</p>
+  </div>
+  <p class="lead">La pregunta de toda la clase: ¿de verdad es resistente?</p>
+  <div class="refs">Caso compuesto sintético (declarado). Ninguna habla directa corresponde a un paciente real.</div>
+</section>
+
+<!-- 4 CONTEXTO MISDX -->
+<section class="slide">
+  <div class="section-tag">Por qué importa</div>
+  <h2>El error diagnóstico en salud mental es frecuente y mal medido</h2>
+  <ul>
+    <li>El diagnóstico inicial de esquizofrenia <b>cambia en 36–51%</b> de los casos tras evaluación adicional.</li>
+    <li>El autorreporte de “depresión” tiene <b>62% de falsos positivos</b>; en una cohorte, el <b>30% tenía bipolar no detectado</b>.</li>
+    <li>No existe consenso sobre cómo <b>definir ni medir</b> el error diagnóstico psiquiátrico.</li>
+  </ul>
+  <div class="warning-box">La psiquiatría carece de un “gold standard” biológico: sin un diagnóstico válido, ni siquiera podemos afirmar que hay “resistencia”.</div>
+  <div class="refs">Bradford A, et al. BMJ Qual Saf 2024 (PMID 38575311). · Phillips J. Diagnosis (Berl) 2014;1(1):75-78.</div>
+</section>
+
+<!-- 5 DEFINICION -->
+<section class="slide">
+  <div class="section-tag">Definiciones</div>
+  <h2>Resistencia real vs pseudorresistencia</h2>
+  <div class="cols">
+    <div class="card blue-h"><h3>Resistencia verdadera (TRD)</h3><p>No respuesta a ≥2 tratamientos <b>adecuados</b> (fármaco correcto, dosis y tiempo suficientes) para el <b>diagnóstico correcto</b>.</p></div>
+    <div class="card salmon-h"><h3>Pseudorresistencia</h3><p>“No responde” porque falló algo <b>antes</b> del fármaco: la logística, o el diagnóstico. La mayoría de las “TRD” son de este tipo.</p></div>
+  </div>
+  <p class="lead">Esta clase trata la pseudorresistencia: un error diagnóstico disfrazado de resistencia.</p>
+  <div class="refs">Bradford A, et al. BMJ Qual Saf 2024. Definición operativa de error dx (omitido / erróneo / retrasado / desigual).</div>
+</section>
+
+<!-- 6 TESIS -->
+<section class="slide impact">
+  <div class="section-tag" style="color:var(--yachay-bg);border-color:var(--yachay-bg)">La tesis</div>
+  <h1>La pseudorresistencia es un error de <span style="color:var(--yachay-salmon)">calibración</span>, no de esfuerzo.</h1>
+  <p class="lead" style="margin-top:1.3rem">Se corrige reabriendo el diagnóstico por niveles de razonamiento, no añadiendo el cuarto fármaco.</p>
+</section>
+
+<!-- 7 ESCALERA -->
+<section class="slide">
+  <div class="section-tag">El mapa de la clase</div>
+  <h2>La escalera de 6 peldaños</h2>
+  <div class="staircase">
+    <div class="st" style="height:35%"><b>0</b><small>Operativo</small></div>
+    <div class="st" style="height:48%"><b>1</b><small>Categorial</small></div>
+    <div class="st" style="height:61%"><b>2</b><small>Modelar</small></div>
+    <div class="st" style="height:74%"><b>3</b><small>Dimensionar</small></div>
+    <div class="st" style="height:87%"><b>4</b><small>Conectar</small></div>
+    <div class="st" style="height:100%"><b>5</b><small>Anticipar</small></div>
+  </div>
+  <table class="vtab">
+    <tr><th>Nivel</th><th>Pregunta que responde</th></tr>
+    <tr><td><b>0 Operativo</b></td><td>¿Recibió de verdad el tratamiento? (adherencia, dosis, cinética, sustancias)</td></tr>
+    <tr><td><b>1 Categorial</b></td><td>¿La caja diagnóstica es válida o solo fiable?</td></tr>
+    <tr><td><b>2 Modelar</b></td><td>¿Es primaria o hay una causa secundaria/orgánica?</td></tr>
+    <tr><td><b>3 Dimensionar</b></td><td>¿Qué dimensión o biotipo manda y no se está midiendo?</td></tr>
+    <tr><td><b>4 Conectar</b></td><td>¿Hay un bucle de síntomas que se auto-sostiene?</td></tr>
+    <tr><td><b>5 Anticipar</b></td><td>¿Qué sostiene el estado en el tiempo y el contexto?</td></tr>
+  </table>
+  <div class="refs">Marco pedagógico: 5 niveles de razonamiento clínico (Flores-Cohaila & Huarcaya-Victoria, en preparación).</div>
+</section>
+
+<!-- 8 DUAL PROCESS -->
+<section class="slide">
+  <div class="section-tag">El sustrato cognitivo</div>
+  <h2>Cómo razona la mente clínica: doble proceso</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>Sistema 1 — intuitivo</h3><p>Rápido, automático, basado en patrones. Eficiente, pero abre la puerta a los sesgos.</p></div>
+    <div class="card blue-h"><h3>Sistema 2 — analítico</h3><p>Lento, deliberado, verificador. Se activa cuando algo “no encaja”.</p></div>
+  </div>
+  <p>La “resistencia” suele nacer de un Sistema 1 no verificado: un patrón cerrado demasiado pronto.</p>
+  <div class="refs">Croskerry P, et al. Cognitive debiasing 1. BMJ Qual Saf 2013.</div>
+</section>
+
+<!-- 9 DOBLE GOLPE -->
+<section class="slide">
+  <div class="section-tag">Cómo se corrige de verdad</div>
+  <h2>El doble golpe: sesgo + conocimiento</h2>
+  <div class="cols">
+    <div class="card"><h3>Enseñar el sesgo no basta</h3><p>Los clínicos <b>no concuerdan</b> en qué sesgo está presente; el juicio lo domina el resultado ya conocido (hindsight).</p></div>
+    <div class="card"><h3>Lo que sí funciona</h3><p>Conocer el <b>rasgo discriminante</b> entre diagnósticos parecidos vence el anclaje mejor que “pensar más despacio”.</p></div>
+  </div>
+  <div class="info-box">Por eso cada nivel de esta clase enseña <b>el sesgo Y el conocimiento</b> que lo derrota.</div>
+  <div class="refs">Norman GR, et al. Acad Med 2017. · Zwaan L, et al. BMJ Qual Saf 2016. · Mamede S, et al. BMJ Qual Saf 2024 (PMID 38365449).</div>
+</section>
+
+<!-- 10 COMO LEER -->
+<section class="slide impact">
+  <div class="section-tag" style="color:var(--yachay-bg);border-color:var(--yachay-bg)">El patrón que se repite 6 veces</div>
+  <h1>“No responde a nada” → <span style="color:var(--yachay-salmon)">“no era resistente, era un error de Nivel N”.</span></h1>
+  <p class="lead" style="margin-top:1.2rem">Cada peldaño: un caso · el sesgo que atrapa · la trampa · el antídoto.</p>
+</section>
+
+<!-- 11 NIVEL 0 DEF -->
+<section class="slide">
+  <div class="rail"><div class="step on">0 · Operativo</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 0 · Lo aburrido</div>
+  <h2>Antes de razonar: ¿recibió el tratamiento?</h2>
+  <p>La causa más común de “no respuesta” no es del cerebro: es logística. Se descarta primero, en 30 segundos.</p>
+  <table class="vtab">
+    <tr><th>Verifica</th><th>Cómo</th></tr>
+    <tr><td>Adherencia</td><td>preguntar sin juzgar; nivel sérico si aplica</td></tr>
+    <tr><td>Dosis × tiempo</td><td>¿dosis terapéutica por tiempo suficiente?</td></tr>
+    <tr><td>Farmacocinética</td><td>metabolizador rápido, interacciones (CYP)</td></tr>
+    <tr><td>Sustancias</td><td>consumo activo que sabotea la respuesta</td></tr>
+  </table>
+  <div class="warning-box"><b>Sesgo de comisión:</b> el reflejo de subir el fármaco antes de verificar lo básico.</div>
+</section>
+
+<!-- 12 NIVEL 0 POR QUE -->
+<section class="slide">
+  <div class="rail"><div class="step on">0 · Operativo</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 0 · la regla</div>
+  <h2>Nunca escales farmacología sobre una base no verificada</h2>
+  <ul>
+    <li>Escalar dosis o combinar fármacos sobre mala adherencia <b>multiplica efectos adversos sin ganancia</b>.</li>
+    <li>Un metabolizador rápido con nivel sérico bajo <b>no es resistente</b>: está infradosificado.</li>
+    <li>El consumo activo puede sostener el cuadro por sí solo.</li>
+  </ul>
+  <div class="info-box">Regla de bolsillo: “resistente” solo aplica si el tratamiento fue <b>adecuado y recibido</b>.</div>
+</section>
+
+<!-- 13 NIVEL 1 DEF -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step on">1 · Categorial</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 1 · Categorial</div>
+  <h2>Razonar por categorías: el poder y el precio de la caja</h2>
+  <p>Clasificar (F20, F31, F32…) comunica rápido y da acceso a tratamiento. Pero una categoría <b>fiable</b> no es necesariamente <b>válida</b>: la mayoría de las categorías psiquiátricas no son entidades naturales discretas.</p>
+  <div class="info-box">La fiabilidad del DSM-5 es heterogénea: en los field trials, algunos diagnósticos alcanzaron κ “muy bueno” y otros “inaceptable”.</div>
+  <div class="refs">Regier DA, et al. DSM-5 field trials, Part II. Am J Psychiatry 2013. · Jablensky A. World Psychiatry 2016.</div>
+</section>
+
+<!-- 14 NIVEL 1 CASO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step on">1 · Categorial</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 1 · el caso</div>
+  <h2>F20 · F25 · F31.2 — la discusión clásica</h2>
+  <div class="card blue-h"><p>Hombre de 30 años. En cuatro años su código rota entre <b>F20 (esquizofrenia)</b>, <b>F25 (esquizoafectivo)</b> y <b>F31.2 (bipolar con psicosis)</b> según quién lo evalúe. Sigue con antipsicóticos; hoy lo llaman “esquizofrenia resistente”.</p></div>
+  <p class="mut">Nunca se reconstruyó si la psicosis ocurre <b>solo</b> durante episodios afectivos o también fuera de ellos — el dato que separa los tres códigos.</p>
+  <span class="badge">Voto</span> ¿La caja es válida, o solo fiable?
+</section>
+
+<!-- 15 NIVEL 1 VALIDADORES -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step on">1 · Categorial</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 1 · el antídoto</div>
+  <h2>Validadores diagnósticos: confiabilidad ≠ validez</h2>
+  <p>Para saber si una caja es válida, se prueban sus <b>validadores</b> (Robins & Guze):</p>
+  <ul>
+    <li>Descripción clínica y <b>curso longitudinal</b>.</li>
+    <li><b>Relación temporal</b> entre ánimo y psicosis (el dato que faltaba).</li>
+    <li>Respuesta al tratamiento · antecedentes familiares.</li>
+  </ul>
+  <p style="margin:.3rem 0 .1rem"><b>Confiabilidad (κ) por diagnóstico — DSM-5 field trials:</b></p>
+  <div class="kaxis">
+    <div class="z z1">Inaceptable</div><div class="z z2">Dudoso</div><div class="z z3">Bueno</div><div class="z z4">Muy bueno</div>
+  </div>
+  <div class="krange"><span>&lt;0.20</span><span>0.20–0.39</span><span>0.40–0.59</span><span>0.60–0.79</span></div>
+  <div class="kchips">
+    <div class="c"><b>3 dx</b></div>
+    <div class="c"><b class="kmark">Depresión mayor · Ansiedad generalizada</b></div>
+    <div class="c"><b>Esquizofrenia · Bipolar I · Esquizoafectivo · TLP</b></div>
+    <div class="c"><b>TNC mayor · TEPT · TEA · TDAH niño</b></div>
+  </div>
+  <div class="warning-box" style="font-size:.9rem"><b>El golpe:</b> la depresión mayor y la ansiedad generalizada —las cajas más usadas— caen en <b>“dudoso”</b>. Fiable no es válido.</div>
+  <div class="refs">Estructura por tiers verificada: Regier DA, et al. Am J Psychiatry 2013 (PMID 23111466; 5 muy buenos / 9 buenos / 6 dudosos / 3 inaceptables). Ubicación de diagnósticos por tier — a confirmar con la tabla del artículo (sin decimales inventados). · Robins & Guze 1970.</div>
+</section>
+
+<!-- 16 NIVEL 1 TRAMPA -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step on">1 · Categorial</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 1 · resumen</div>
+  <h2>La trampa del nivel categorial</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>Trampa</h3><p>Reificar la caja: usar el rótulo como si fuera el mecanismo.</p></div>
+    <div class="card salmon-h"><h3>Sesgo</h3><p>Anclaje — el primer código fija la lectura; luego se confirma.</p></div>
+    <div class="card blue-h"><h3>Antídoto</h3><p>Validadores; reconstruir el curso; aceptar fronteras convencionales.</p></div>
+  </div>
+  <p class="lead">La “resistencia” era una caja mal puesta y reificada.</p>
+</section>
+
+<!-- 17 NIVEL 2 DEF -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · Modelar</div>
+  <h2>Del checklist al modelo: primaria vs secundaria</h2>
+  <p>Modelar es poner <b>hipótesis a competir</b> y obligar a cada una a predecir algo distinto. El error diagnóstico incluye <b>confundir una enfermedad física con una condición psiquiátrica</b>, o viceversa.</p>
+  <div class="warning-box">Cuando una psicosis “no responde”, la primera hipótesis a reabrir es: <b>¿es secundaria/orgánica?</b></div>
+  <div class="refs">Phillips J. Diagnosis (Berl) 2014. · Bradford A, et al. BMJ Qual Saf 2024 (def. de Cullen et al.).</div>
+</section>
+
+<!-- 18 NIVEL 2 CASO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · el caso</div>
+  <h2>Psicosis “resistente a 3 antipsicóticos”</h2>
+  <div class="card blue-h"><p>Mujer de 23 años, sin antecedentes. Psicosis de ~10 días. En tres semanas: risperidona → olanzapina → haloperidol a dosis adecuadas. No mejora. El equipo empieza a decir <b>“refractaria”</b>.</p></div>
+  <div class="card salmon-h"><p><b>El giro:</b> el cuadro completo se instaló en ~5 días; aparecen <b>movimientos orofaciales</b> y rigidez con <b>flexibilidad cérea</b>; una noche, febrícula y taquicardia. Nadie pidió examen neurológico ni LCR.</p></div>
+  <div class="refs">Caso compuesto sintético (declarado).</div>
+</section>
+
+<!-- 19 ORGANICIDAD -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · el problema</div>
+  <h2>La encefalitis autoinmune que parece psiquiátrica</h2>
+  <ul>
+    <li>La encefalitis anti-NMDAR debuta con <b>síntomas psiquiátricos en ~100%</b> de los casos: psicosis, catatonía, cambios conductuales.</li>
+    <li>Se confunde con esquizofrenia o trastorno bipolar; el tratamiento antipsicótico “no responde”.</li>
+    <li>Aplicar red flags de forma sistemática <b>redujo el tiempo al diagnóstico en 58%</b> (hasta 75% en anti-NMDAR).</li>
+  </ul>
+  <div class="refs">Herken J, Prüss H. Front Psychiatry 2017. · Pollak TA, Lennox BR, et al. Lancet Psychiatry 2020 (PMID 31669058).</div>
+</section>
+
+<!-- 20 VEMMFAL QUE ES -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · la herramienta</div>
+  <h2>VEMMFAL: qué es y de dónde sale</h2>
+  <p><b>VEMMFAL</b> es un eje de organicidad: una regla nemotécnica que ordena los indicadores de causa orgánica/secundaria en una presentación psiquiátrica, <b>agrupados por sistema de detección</b> (dónde se capta el dato), no por etiología.</p>
+  <ul>
+    <li><b>De dónde sale:</b> es una <b>síntesis de la evidencia</b> (meta-análisis de psicopatología, cohortes de encefalitis autoinmune, modelos predictivos y checklists de <i>medical clearance</i> como el SMART), reordenada para el razonamiento clínico.</li>
+    <li><b>Para qué:</b> tamizar la organicidad <b>por método</b>, no por impresión — y alimentar una compuerta de validez antes de asumir refractariedad.</li>
+  </ul>
+  <div class="warning-box">Estatus honesto: es un instrumento de <b>síntesis, aún no validado prospectivamente</b>. Ordena la evidencia; no sustituye el juicio.</div>
+  <div class="refs">Síntesis Flores-Cohaila (VEMMFAL). Modelo metodológico: SMART Medical Clearance (Mesbah et al. Am J Emerg Med 2025) y SNNOOP10 para cefaleas (Do et al. Neurology 2018).</div>
+</section>
+
+<!-- 21 VEMMFAL 7 LETRAS -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · VEMMFAL en detalle</div>
+  <h2>Las 7 letras</h2>
+  <div class="vemmfal">
+    <div class="l">V<small>Vitals</small></div><div class="l">E<small>Examen</small></div>
+    <div class="l">M<small>Mente</small></div><div class="l">M<small>Movim.</small></div>
+    <div class="l">F<small>Fenom.</small></div><div class="l">A<small>Antec.</small></div>
+    <div class="l">L<small>Labs</small></div>
+  </div>
+  <table class="vtab">
+    <tr><th>Letra</th><th>Dominio</th><th>Qué capta</th></tr>
+    <tr><td>V</td><td>Vitals</td><td>signos vitales anormales, glucosa</td></tr>
+    <tr><td>E</td><td>Examen</td><td>focalidad neurológica, signos meníngeos</td></tr>
+    <tr><td>M</td><td>Mente</td><td>delirium / fluctuación de conciencia</td></tr>
+    <tr><td>M</td><td>Movimientos</td><td>crisis, distonía, catatonía, flexibilidad cérea</td></tr>
+    <tr><td>F</td><td>Fenomenología</td><td>tipo de alucinación, forma del pensamiento</td></tr>
+    <tr><td>A</td><td>Antecedente/curso</td><td>tempo de instauración, edad, refractariedad</td></tr>
+    <tr><td>L</td><td>Labs</td><td>LCR, RM/EEG, tiroides, autoinmunidad</td></tr>
+  </table>
+  <div class="refs">Herken J, Prüss H. Front Psychiatry 2017. · Blackman G, et al. Schizophr Res 2026.</div>
+</section>
+
+<!-- 22 VEMMFAL TEMPO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · el discriminador #1</div>
+  <h2>El tempo de instauración</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>Anti-NMDAR</h3><p style="font-size:1.6rem;color:var(--yachay-salmon);font-family:var(--yachay-font-heading)">mediana 1 día</p><p>(cuadro completo en horas–días)</p></div>
+    <div class="card blue-h"><h3>Psicosis primaria</h3><p style="font-size:1.6rem;color:var(--yachay-blue);font-family:var(--yachay-font-heading)">mediana 180 días</p><p>(instauración insidiosa, meses)</p></div>
+  </div>
+  <div class="tl">
+    <div class="bar b-ae">anti-NMDAR · 1 día</div>
+    <div class="bar b-pp">psicosis primaria · 180 días</div>
+    <div class="lab" style="left:0">día 0</div>
+    <div class="lab" style="right:0">día 180</div>
+  </div>
+  <p>La velocidad hasta el síndrome completo fue el <b>discriminador individual más potente</b> (p&lt;0,0001). Un cuadro que se arma en días es una bandera roja.</p>
+  <div class="refs">Al-Diwani A, et al. Lancet Psychiatry 2026 (PMID 41386901). NMDAR-AE n=100 vs psicosis primaria n=135.</div>
+</section>
+
+<!-- 23 VEMMFAL FENOMENOLOGIA -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · qué mirar</div>
+  <h2>Movimientos y fenomenología que apuntan a orgánica</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>→ Orgánica</h3><ul><li>flexibilidad cérea / catatonía</li><li>pobreza del habla</li><li>alucinaciones visuales</li><li>discinesia orofacial</li></ul></div>
+    <div class="card blue-h"><h3>→ Primaria (protector)</h3><ul><li>inserción / difusión del pensamiento</li><li>alucinaciones auditivas</li><li>síntomas de primer rango de Schneider</li></ul></div>
+  </div>
+  <div class="refs">Blackman G, et al. Schizophr Res 2026 (MA, n=1564). · Herken J, Prüss H. Front Psychiatry 2017.</div>
+</section>
+
+<!-- 24 VEMMFAL CALIBRACION -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · calibración bidireccional</div>
+  <h2>Ni perderla, ni sobrediagnosticarla</h2>
+  <div class="cols">
+    <div class="card blue-h"><h3>No la pierdas</h3><p>La “resistencia” del caso era encefalitis anti-NMDAR. Las red flags (A + M) la delatan.</p></div>
+    <div class="card salmon-h"><h3>No la sobrediagnostiques</h3><p>En psicosis <b>sin signos neurológicos</b>, los anticuerpos NMDAR fueron <b>0%</b>; 20% cumplió criterios de psicosis autoinmune y <b>ninguno la tenía</b>.</p></div>
+  </div>
+  <p class="mtxhd">Columnas: <b>¿es encefalitis autoinmune?</b> — Filas: <b>¿la sospechaste?</b></p>
+  <div class="mtx">
+    <div class="cell ok"><b>Sospechas · Sí es</b>La detectas a tiempo</div>
+    <div class="cell err"><b>Sospechas · No es</b>Falso positivo → sobrediagnóstico</div>
+    <div class="cell err"><b>No sospechas · Sí es</b>Falso negativo → la pierdes (daño)</div>
+    <div class="cell ok"><b>No sospechas · No es</b>Correcto</div>
+  </div>
+  <div class="warning-box"><b>Sesgo:</b> búsqueda satisfactoria (parar en el 1.er modelo). VEMMFAL mejora la <b>calibración</b>: te mantiene en la diagonal. <b>El antídoto no es pedir todos los estudios — es tamizar por sistema.</b></div>
+  <div class="refs">Guasp M, et al. Neurology 2021 (PMID 33980703). · Flanagan EP, et al. JAMA Neurol 2023 (PMID 36441519): 18% de “encefalitis autoinmune” eran psiquiátricos. · Warren N, et al. ANZJP 2023.</div>
+</section>
+
+<!-- 25 VEMMFAL VS SMART -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step on">2 · Modelar</div><div class="step">3</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 2 · dónde aporta</div>
+  <h2>VEMMFAL frente al checklist de urgencias (SMART)</h2>
+  <table class="vtab">
+    <tr><th></th><th>SMART</th><th>VEMMFAL</th></tr>
+    <tr><td>Pregunta</td><td>¿es seguro admitir ahora? (estabilidad aguda)</td><td>¿qué probabilidad de causa orgánica/secundaria?</td></tr>
+    <tr><td>Horizonte</td><td>agudo</td><td>agudo y subagudo (encefalitis, tiroides, Lewy)</td></tr>
+    <tr><td>Fenomenología</td><td>no la usa</td><td>sí (tipo de alucinación, movimientos)</td></tr>
+    <tr><td>Validación</td><td>sí (VPN 99%)</td><td>no (instrumento de síntesis)</td></tr>
+  </table>
+  <div class="info-box">VEMMFAL no reemplaza al SMART: cubre lo <b>subagudo y ambulatorio</b> que el SMART no busca.</div>
+  <div class="refs">Mesbah et al. Am J Emerg Med 2025 (SMART, Sens 83%, Esp 45%, VPN 99%).</div>
+</section>
+
+<!-- 26 NIVEL 3 DEF -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step on">3 · Dimensionar</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 3 · Dimensionar</div>
+  <h2>De cajas a dimensiones</h2>
+  <p>Muchos cuadros no son una caja sino un <b>perfil</b> en varios continuos (distress, desinhibición, psicoticismo…). Marcos como <b>HiTOP</b> y <b>RDoC</b> describen esas dimensiones; el tratamiento debe apuntar a la dimensión activa, no solo a la etiqueta.</p>
+  <div class="info-box">Cuando dos “comorbilidades” comparten espectro, se trata el <b>espectro</b>, no la lista.</div>
+  <div class="refs">Kotov R, et al. HiTOP. J Abnorm Psychol 2017. · Cuthbert BN, Insel TR. RDoC. BMC Med 2013.</div>
+</section>
+
+<!-- 27 NIVEL 3 CASO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step on">3 · Dimensionar</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 3 · el caso</div>
+  <h2>“Depresión resistente” a 3 antidepresivos</h2>
+  <div class="card blue-h"><p>Mujer de 40 años. Fallaron sertralina, venlafaxina y una combinación. Persisten <b>anhedonia marcada, fatiga y enlentecimiento</b>. IMC alto, PCR elevada.</p></div>
+  <p class="mut">Se trató “la caja depresión” con serotoninérgicos. Nunca se midió la dimensión de recompensa por separado.</p>
+  <div class="refs">Caso compuesto sintético (declarado).</div>
+</section>
+
+<!-- 28 NIVEL 3 BIOTIPO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step on">3 · Dimensionar</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 3 · el antídoto</div>
+  <h2>El biotipo inmunometabólico/anhedónico</h2>
+  <ul>
+    <li>Un subgrupo de depresión combina <b>anhedonia, fatiga e inflamación</b> (PCR, IMC): la depresión <b>inmunometabólica</b>.</li>
+    <li>Responde mal a serotoninérgicos porque la dimensión de recompensa depende de otras vías (dopaminérgicas/inflamatorias).</li>
+    <li>No es resistencia: es una <b>dimensión no medida ni tratada</b>.</li>
+  </ul>
+  <div class="info-box">Antídoto: medir la dimensión (anhedonia, marcadores) y tratarla — no añadir un 4.º ISRS.</div>
+  <div class="refs">Milaneschi Y, et al. Immunometabolic depression. Biol Psychiatry 2020. †pendiente verify-citations.</div>
+</section>
+
+<!-- 29 NIVEL 3 TRAMPA -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step on">3 · Dimensionar</div><div class="step">4</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 3 · resumen</div>
+  <h2>La trampa del nivel dimensional</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>Trampa</h3><p>Reificar el puntaje; llamar “mejoría” a un cambio dentro del error de medición.</p></div>
+    <div class="card salmon-h"><h3>Sesgo</h3><p>Negligencia del error de medición: el número total esconde la dimensión que manda.</p></div>
+    <div class="card blue-h"><h3>Antídoto</h3><p>Perfil dimensional; medir y tratar la dimensión activa.</p></div>
+  </div>
+</section>
+
+<!-- 30 NIVEL 4 DEF -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step on">4 · Conectar</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 4 · Conectar</div>
+  <h2>Los síntomas son agentes, no efectos de una causa oculta</h2>
+  <p>En el modelo de <b>red</b>, los síntomas se causan entre sí y forman bucles. Un trastorno puede <b>mantenerse solo</b> aunque desaparezca el disparador original (histéresis). Intervenir el bucle importa más que nombrar la entidad.</p>
+  <div class="refs">Borsboom D. A network theory of mental disorders. World Psychiatry 2017.</div>
+</section>
+
+<!-- 31 NIVEL 4 CASO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step on">4 · Conectar</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 4 · el caso</div>
+  <h2>“Ansiedad + TOC + insomnio resistentes”</h2>
+  <div class="card blue-h"><p>Se medicó cada síntoma por separado — ISRS para el TOC, hipnótico para el insomnio, ansiolítico para la ansiedad — sin respuesta sostenida en ninguno.</p></div>
+  <p class="mut">Al dibujar la semana, aparece un patrón que ninguna caja aislada mostraba.</p>
+  <div class="refs">Caso compuesto sintético (declarado).</div>
+</section>
+
+<!-- 32 NIVEL 4 RED -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step on">4 · Conectar</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 4 · el antídoto</div>
+  <h2>El insomnio es el hub</h2>
+  <svg viewBox="0 0 620 230" style="width:100%;max-height:230px;margin:.2rem 0">
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#4A72A2"/></marker></defs>
+    <g stroke="#4A72A2" stroke-width="3" fill="none" marker-end="url(#ah)">
+      <path d="M150,95 Q210,40 268,52"/>
+      <path d="M340,60 Q430,80 452,100"/>
+      <path d="M470,150 Q400,195 342,190"/>
+      <path d="M262,185 Q170,170 148,145"/>
+    </g>
+    <g font-family="Montserrat,Calibri,sans-serif" font-size="13" text-anchor="middle" font-weight="700">
+      <circle cx="110" cy="120" r="48" fill="#C28B77"/>
+      <text x="110" y="116" fill="#FDEBD0">Insomnio</text><text x="110" y="132" fill="#FDEBD0" font-size="10">HUB</text>
+      <circle cx="305" cy="45" r="40" fill="#2B5282"/>
+      <text x="305" y="42" fill="#FDEBD0" font-size="11">Hiper-</text><text x="305" y="55" fill="#FDEBD0" font-size="11">activación</text>
+      <circle cx="500" cy="120" r="46" fill="#2B5282"/>
+      <text x="500" y="116" fill="#FDEBD0" font-size="11">Rumiación /</text><text x="500" y="130" fill="#FDEBD0" font-size="11">compulsión</text>
+      <circle cx="305" cy="195" r="40" fill="#2B5282"/>
+      <text x="305" y="199" fill="#FDEBD0">Ansiedad</text>
+    </g>
+  </svg>
+  <p class="netcap">El bucle se auto-sostiene (histéresis): mientras el hub siga activo, medicar los otros nodos no basta.</p>
+  <ul>
+    <li>El bucle se auto-sostiene: mientras el hub siga activo, medicar los otros nodos no basta.</li>
+    <li><b>Antídoto:</b> identificar y <b>cortar la arista/hub</b> (tratar el insomnio) reorganiza toda la red.</li>
+  </ul>
+  <p class="lead">No eran tres trastornos resistentes: era una red con un hub no tratado.</p>
+  <div class="refs">Borsboom D. World Psychiatry 2017. · Concepto de red autosostenida (histéresis).</div>
+</section>
+
+<!-- 33 NIVEL 4 TRAMPA -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step on">4 · Conectar</div><div class="step">5</div></div>
+  <div class="section-tag">Nivel 4 · resumen</div>
+  <h2>La trampa del nivel de red</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>Trampa</h3><p>Confundir el dibujo con el sistema; medicar nodos sueltos.</p></div>
+    <div class="card salmon-h"><h3>Sesgo</h3><p>Causa única: buscar una entidad por síntoma, no el bucle.</p></div>
+    <div class="card blue-h"><h3>Antídoto</h3><p>Mapear la red; intervenir el hub y las aristas.</p></div>
+  </div>
+</section>
+
+<!-- 34 NIVEL 5 DEF -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step on">5 · Anticipar</div></div>
+  <div class="section-tag">Nivel 5 · Anticipar</div>
+  <h2>El sistema en el tiempo y en el contexto</h2>
+  <p>Un mismo diagnóstico se comporta distinto según su <b>estadio</b> (temprano vs tardío) y según lo que lo sostiene desde fuera: la carga <b>exposómica</b> y los <b>determinantes sociales</b> (SDOH). Tratar sin leer estadio ni contexto produce “resistencia” aparente.</p>
+  <div class="refs">Howes OD, et al. Duración de psicosis no tratada. World Psychiatry 2021. · Kirkbride JB, et al. Social determinants of mental health. World Psychiatry 2024.</div>
+</section>
+
+<!-- 35 NIVEL 5 CASO -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step on">5 · Anticipar</div></div>
+  <div class="section-tag">Nivel 5 · el caso</div>
+  <h2>Mejora en el hospital, recae al volver a casa</h2>
+  <div class="card blue-h"><p>Joven de 19 años. Cada ingreso mejora; cada alta termina en recaída, semanas después. Los ajustes de dosis no cambian el patrón.</p></div>
+  <div class="card salmon-h"><p><b>El giro:</b> en casa hay violencia doméstica y consumo en el entorno. Y se le trata con la intensidad de un estadio que no es el suyo.</p></div>
+  <div class="refs">Caso compuesto sintético (declarado).</div>
+</section>
+
+<!-- 36 NIVEL 5 STAGING -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step on">5 · Anticipar</div></div>
+  <div class="section-tag">Nivel 5 · el antídoto</div>
+  <h2>Staging + exposoma: leer lo que sostiene el estado</h2>
+  <ul>
+    <li><b>Staging:</b> el estadio clínico fija la <b>intensidad</b> del tratamiento; un estadio tardío tratado como agudo “no responde”.</li>
+    <li><b>Exposoma/SDOH:</b> pobreza, violencia y consumo del entorno sostienen el cuadro; el fármaco no puede contra un contexto activo.</li>
+    <li>Antídoto: intervenir <b>fase y contexto</b>, no solo la dosis.</li>
+  </ul>
+  <div class="refs">McGorry PD, et al. Clinical staging (staging clínico). †pendiente verify-citations. · Kirkbride JB, et al. World Psychiatry 2024.</div>
+</section>
+
+<!-- 37 NIVEL 5 TRAMPA -->
+<section class="slide">
+  <div class="rail"><div class="step">0</div><div class="step">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div><div class="step on">5 · Anticipar</div></div>
+  <div class="section-tag">Nivel 5 · resumen</div>
+  <h2>La trampa del nivel temporal</h2>
+  <div class="cols">
+    <div class="card salmon-h"><h3>Trampa</h3><p>Estadio = destino; ignorar lo que sostiene el estado.</p></div>
+    <div class="card salmon-h"><h3>Sesgo</h3><p>Error fundamental de atribución: culpar al paciente, no al contexto.</p></div>
+    <div class="card blue-h"><h3>Antídoto</h3><p>Staging fija la intensidad; leer y tratar el exposoma/SDOH.</p></div>
+  </div>
+</section>
+
+<!-- 38 META -->
+<section class="slide impact">
+  <div class="section-tag" style="color:var(--yachay-bg);border-color:var(--yachay-bg)">La meta-destreza</div>
+  <h1>Antes de escalar el tratamiento,<br><span style="color:var(--yachay-salmon)">re-baja la escalera diagnóstica.</span></h1>
+  <p class="lead" style="margin-top:1.2rem">La “resistencia” es la señal para reabrir el diagnóstico, no para añadir el cuarto fármaco.</p>
+</section>
+
+<!-- 39 CHECKLIST -->
+<section class="slide">
+  <div class="section-tag">Para el bolsillo</div>
+  <h2>Seis preguntas antes de decir “resistente”</h2>
+  <table class="vtab">
+    <tr><th>Nivel</th><th>Pregunta</th><th>Sesgo a vencer</th></tr>
+    <tr><td>0 Operativo</td><td>¿Descarté adherencia, dosis, cinética, sustancias?</td><td>comisión</td></tr>
+    <tr><td>1 Categorial</td><td>¿La caja es válida o solo fiable?</td><td>anclaje</td></tr>
+    <tr><td>2 Modelar</td><td>¿Descarté causa secundaria (VEMMFAL)?</td><td>búsqueda satisfactoria</td></tr>
+    <tr><td>3 Dimensionar</td><td>¿Qué dimensión/biotipo manda?</td><td>negligencia de medición</td></tr>
+    <tr><td>4 Conectar</td><td>¿Hay un hub en la red?</td><td>causa única</td></tr>
+    <tr><td>5 Anticipar</td><td>¿Qué sostiene el estado (estadio, contexto)?</td><td>error de atribución</td></tr>
+  </table>
+</section>
+
+<!-- 40 CIERRE + REFS -->
+<section class="slide">
+  <div class="section-tag">Cierre y referencias</div>
+  <h2>La perla, y de dónde viene todo</h2>
+  <div class="info-box" style="font-size:1.15rem"><b>“‘Resistente al tratamiento’ es, casi siempre, un diagnóstico sobre el clínico, no sobre el paciente.”</b> · Post-test (viñeta gemela) + QR de reacción.</div>
+  <ol class="reflist">
+    <li>Bradford A, et al. Diagnostic error in mental health: a review. BMJ Qual Saf. 2024. PMID 38575311.</li>
+    <li>Phillips J. Detecting diagnostic error in psychiatry. Diagnosis (Berl). 2014;1(1):75-78.</li>
+    <li>Croskerry P, et al. Cognitive debiasing 1. BMJ Qual Saf. 2013.</li>
+    <li>Norman GR, et al. Causes of errors in clinical reasoning. Acad Med. 2017.</li>
+    <li>Zwaan L, et al. Is bias in the eye of the beholder? BMJ Qual Saf. 2016.</li>
+    <li>Mamede S, et al. Anchoring bias in diagnostic reasoning (RCT). BMJ Qual Saf. 2024. PMID 38365449.</li>
+    <li>Regier DA, et al. DSM-5 field trials, Part II. Am J Psychiatry. 2013.</li>
+    <li>Jablensky A. Psychiatric classifications: validity and utility. World Psychiatry. 2016.</li>
+    <li>Robins E, Guze SB. Establishment of diagnostic validity. Am J Psychiatry. 1970.</li>
+    <li>Herken J, Prüss H. Red flags of autoimmune encephalitis. Front Psychiatry. 2017.</li>
+    <li>Pollak TA, Lennox BR, et al. Autoimmune psychosis consensus. Lancet Psychiatry. 2020. PMID 31669058.</li>
+    <li>Al-Diwani A, et al. NMDAR-AE vs primary psychosis phenotype. Lancet Psychiatry. 2026. PMID 41386901.</li>
+    <li>Blackman G, et al. Psychopathology of secondary psychosis (MA). Schizophr Res. 2026.</li>
+    <li>Guasp M, et al. Antibodies in first-episode psychosis. Neurology. 2021. PMID 33980703.</li>
+    <li>Flanagan EP, et al. Autoimmune encephalitis misdiagnosis. JAMA Neurol. 2023. PMID 36441519.</li>
+    <li>Warren N, et al. Anti-GAD in psychosis (MA). ANZJP. 2023.</li>
+    <li>Mesbah et al. SMART medical clearance validation. Am J Emerg Med. 2025.</li>
+    <li>Do TP, et al. SNNOOP10 headache red flags. Neurology. 2018.</li>
+    <li>Kotov R, et al. HiTOP. J Abnorm Psychol. 2017.</li>
+    <li>Cuthbert BN, Insel TR. RDoC. BMC Med. 2013.</li>
+    <li>Milaneschi Y, et al. Immunometabolic depression. Biol Psychiatry. 2020. †</li>
+    <li>Borsboom D. Network theory of mental disorders. World Psychiatry. 2017.</li>
+    <li>Howes OD, et al. Duration of untreated psychosis (umbrella). World Psychiatry. 2021.</li>
+    <li>Kirkbride JB, et al. Social determinants of mental health. World Psychiatry. 2024.</li>
+    <li>McGorry PD, et al. Clinical staging in psychiatry. †</li>
+  </ol>
+  <div class="refs">† Referencias marcadas: pendientes de verify-citations antes de la versión final.</div>
+</section>
+
+</div>
+
+<div class="nav"><button id="prev" aria-label="anterior">‹</button><button id="next" aria-label="siguiente">›</button></div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, cur=document.getElementById('cur');
+  slides.forEach(function(s){
+    var f=document.createElement('div'); f.className='foot';
+    f.innerHTML='<span class="brand">YACHAY PRO · Ciencias & Salud Mental</span>'+
+      '<span class="names">Hecho para Yachay. Colaboración del <b>Dr. Jeff Huarcaya-Victoria</b> y <b>Dr. Javier Flores-Cohaila</b></span>';
+    s.appendChild(f);
+  });
+  function show(n){i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){s.classList.toggle('active',k===i);});
+    cur.textContent=i+1; slides[i].scrollTop=0;}
+  document.getElementById('next').onclick=function(){show(i+1);};
+  document.getElementById('prev').onclick=function(){show(i-1);};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){show(i+1);}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){show(i-1);}
+    if(e.key==='Home'){show(0);} if(e.key==='End'){show(slides.length-1);}});
+  show(0);
+})();
+</script>
+</body>
+</html>
